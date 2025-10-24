@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { Player, Division, Position, Submission } from '../types';
+import { supabase } from '../supabaseClient';
+import { Player, Division, Position } from '../types';
 import { DIVISIONS, POSITIONS, MAX_PLAYERS } from '../constants';
 import PlusIcon from '../components/icons/PlusIcon';
 import TrashIcon from '../components/icons/TrashIcon';
@@ -13,7 +12,7 @@ const CaptainForm = () => {
     ]);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-    const [, setSubmissions] = useLocalStorage<Submission[]>('submissions', []);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const addPlayer = () => {
         if (players.length >= MAX_PLAYERS) {
@@ -39,7 +38,7 @@ const CaptainForm = () => {
         setPlayers([{ id: crypto.randomUUID(), playerName: '', division: Division.D1, position: Position.MAIN_NETTY }]);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setSuccess(null);
@@ -54,18 +53,23 @@ const CaptainForm = () => {
             return;
         }
 
-        const newSubmission: Submission = {
-            id: crypto.randomUUID(),
-            teamName: teamName.trim(),
-            submittedAt: new Date().toISOString(),
-            players: players.map(({ id, ...playerData }) => playerData)
-        };
+        setIsSubmitting(true);
 
-        setSubmissions(prev => [newSubmission, ...prev]);
-        setSuccess('Thanks! Your roster was submitted.');
-        resetForm();
+        const { error: insertError } = await supabase.from('submissions').insert({
+            team_name: teamName.trim(),
+            players: players.map(({ id, ...playerData }) => playerData) // Exclude client-side id
+        });
 
-        setTimeout(() => setSuccess(null), 5000);
+        setIsSubmitting(false);
+
+        if (insertError) {
+            console.error('Error inserting data:', insertError);
+            setError(`Submission failed: ${insertError.message}`);
+        } else {
+            setSuccess('Thanks! Your roster was submitted.');
+            resetForm();
+            setTimeout(() => setSuccess(null), 5000);
+        }
     };
 
     return (
@@ -124,8 +128,8 @@ const CaptainForm = () => {
                             <PlusIcon className="h-5 w-5" />
                             Add Player
                         </button>
-                        <button type="submit" className="w-full sm:w-auto inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            Submit Roster
+                        <button type="submit" disabled={isSubmitting} className="w-full sm:w-auto inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-wait">
+                            {isSubmitting ? 'Submitting...' : 'Submit Roster'}
                         </button>
                     </div>
                 </form>

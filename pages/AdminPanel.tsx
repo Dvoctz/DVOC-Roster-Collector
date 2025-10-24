@@ -1,12 +1,40 @@
-
-import React from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import { Submission } from '../types';
 import { generateCsvContent, downloadCsv } from '../utils/csv';
 import DownloadIcon from '../components/icons/DownloadIcon';
 
 const AdminPanel = () => {
-    const [submissions] = useLocalStorage<Submission[]>('submissions', []);
+    const [submissions, setSubmissions] = useState<Submission[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchSubmissions = async () => {
+            setLoading(true);
+            const { data, error } = await supabase
+                .from('submissions')
+                .select('*')
+                .order('submitted_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching data:', error);
+                setError('Failed to load submissions: ' + error.message);
+                setSubmissions([]);
+            } else if (data) {
+                const formattedData: Submission[] = data.map(item => ({
+                    id: item.id,
+                    teamName: item.team_name,
+                    submittedAt: item.submitted_at,
+                    players: item.players,
+                }));
+                setSubmissions(formattedData);
+            }
+            setLoading(false);
+        };
+
+        fetchSubmissions();
+    }, []);
 
     const handleDownloadAll = () => {
         if (submissions.length === 0) return;
@@ -25,6 +53,23 @@ const AdminPanel = () => {
         return acc;
     }, {} as Record<string, Submission[]>);
 
+    if (loading) {
+        return (
+            <div className="text-center p-12">
+                <p className="text-gray-600 dark:text-gray-300">Loading submissions...</p>
+            </div>
+        );
+    }
+    
+    if (error) {
+         return (
+            <div className="text-center p-12 bg-red-50 dark:bg-red-900/50 rounded-lg max-w-4xl mx-auto">
+                <h3 className="text-lg font-medium text-red-800 dark:text-red-200">Something went wrong</h3>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-300">{error}</p>
+                 <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">Please check your Supabase connection and ensure the table security rules are set correctly.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
