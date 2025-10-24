@@ -66,7 +66,7 @@ const App = () => {
             <main className={isLoginPage ? '' : 'py-10'}>
                 <style>{`
                   .input-field, .select-field {
-                    @apply block w-full px-3 py-2 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white text-sm;
+                    @apply block w-full px-3 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-gray-900 text-sm;
                   }
                 `}</style>
                 <Routes>

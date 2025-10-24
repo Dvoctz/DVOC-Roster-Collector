@@ -89,7 +89,7 @@ const CaptainForm = () => {
                             id="teamName"
                             value={teamName}
                             onChange={(e) => setTeamName(e.target.value)}
-                            className="block w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-white"
+                            className="block w-full px-4 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-gray-900"
                             required
                         />
                     </div>
