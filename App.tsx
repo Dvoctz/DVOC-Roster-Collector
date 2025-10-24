@@ -1,18 +1,44 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import CaptainForm from './pages/CaptainForm';
 import AdminLogin from './pages/AdminLogin';
 import AdminPanel from './pages/AdminPanel';
+import { supabase } from './supabaseClient';
+import type { Session } from '@supabase/supabase-js';
 
 const App = () => {
-    const [isAdmin, setIsAdmin] = useState(false);
+    const [session, setSession] = useState<Session | null>(null);
+    const [loading, setLoading] = useState(true);
     const location = useLocation();
+
+    useEffect(() => {
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setSession(session);
+            setLoading(false);
+        };
+        getSession();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
     
-    const handleLogin = () => setIsAdmin(true);
-    const handleLogout = () => setIsAdmin(false);
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+    };
 
     const isLoginPage = location.pathname === '/login';
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+                <p className="text-gray-600 dark:text-gray-300">Loading application...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans">
@@ -23,7 +49,7 @@ const App = () => {
                             <Link to="/" className="text-xl font-bold text-indigo-600 dark:text-indigo-400">DVOC Roster Collector</Link>
                              <div className="flex items-center gap-4">
                                 <Link to="/" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500">Captain Form</Link>
-                                {isAdmin ? (
+                                {session ? (
                                     <>
                                         <Link to="/admin" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500">Admin Panel</Link>
                                         <Link to="/" onClick={handleLogout} className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500">Logout</Link>
@@ -45,8 +71,8 @@ const App = () => {
                 `}</style>
                 <Routes>
                     <Route path="/" element={<CaptainForm />} />
-                    <Route path="/login" element={<AdminLogin onLogin={handleLogin} />} />
-                    <Route path="/admin" element={isAdmin ? <AdminPanel /> : <Navigate to="/login" replace />} />
+                    <Route path="/login" element={!session ? <AdminLogin /> : <Navigate to="/admin" replace />} />
+                    <Route path="/admin" element={session ? <AdminPanel /> : <Navigate to="/login" replace />} />
                 </Routes>
             </main>
         </div>

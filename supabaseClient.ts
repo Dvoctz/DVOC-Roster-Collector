@@ -1,7 +1,19 @@
-// Fix: Add Vite client type definitions for `import.meta.env`.
-/// <reference types="vite/client" />
 
 import { createClient } from '@supabase/supabase-js';
+
+// FIX: The manual type definitions for `import.meta.env` were incorrect.
+// The `interface ImportMeta` was declared in the module scope, which does not
+// augment the global type. Using `declare global` correctly augments the
+// global `ImportMeta` interface, resolving TypeScript errors.
+declare global {
+    interface ImportMeta {
+        readonly env: {
+            readonly VITE_SUPABASE_URL: string;
+            readonly VITE_SUPABASE_ANON_KEY: string;
+        }
+    }
+}
+
 
 // In a Vite project, environment variables are accessed via `import.meta.env`.
 // These variables are replaced at build time by Vercel.

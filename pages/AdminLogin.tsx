@@ -1,26 +1,30 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
 
-interface AdminLoginProps {
-    onLogin: () => void;
-}
-
-const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
-    const [username, setUsername] = useState('');
+const AdminLogin = () => {
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, this would be an API call.
-        // Hardcoded for demonstration purposes.
-        if (username === 'admin' && password === 'password') {
-            onLogin();
-            navigate('/admin');
+        setError('');
+        setLoading(true);
+
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        setLoading(false);
+
+        if (error) {
+            setError(error.message);
         } else {
-            setError('Invalid username or password.');
+            navigate('/admin');
         }
     };
 
@@ -31,25 +35,22 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
                         Admin Login
                     </h2>
-                    <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                        (Hint: admin / password)
-                    </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleLogin}>
                     {error && <p className="text-center text-red-500 text-sm">{error}</p>}
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
-                            <label htmlFor="username" className="sr-only">Username</label>
+                            <label htmlFor="email-address" className="sr-only">Email address</label>
                             <input
-                                id="username"
-                                name="username"
-                                type="text"
-                                autoComplete="username"
+                                id="email-address"
+                                name="email"
+                                type="email"
+                                autoComplete="email"
                                 required
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white bg-white dark:bg-gray-700 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Username"
+                                placeholder="Email address"
                             />
                         </div>
                         <div>
@@ -71,9 +72,10 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
                     <div>
                         <button
                             type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            disabled={loading}
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-wait"
                         >
-                            Sign in
+                            {loading ? 'Signing in...' : 'Sign in'}
                         </button>
                     </div>
                 </form>
