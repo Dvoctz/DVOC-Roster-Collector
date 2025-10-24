@@ -1,0 +1,5 @@
+{
+  "name": "DVOC Team List Collector",
+  "description": "A web application for volleyball captains to submit their team player lists. An admin can view all submissions and download them as CSV files.",
+  "requestFramePermissions": []
+}
