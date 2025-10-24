@@ -72,6 +72,10 @@ const CaptainForm = () => {
         }
     };
 
+    const inputStyles = "mt-1 block w-full px-3 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-gray-900 text-sm";
+    const teamNameInputStyles = "block w-full px-3 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-gray-900 text-sm";
+
+
     return (
         <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
             <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 sm:p-8">
@@ -89,7 +93,7 @@ const CaptainForm = () => {
                             id="teamName"
                             value={teamName}
                             onChange={(e) => setTeamName(e.target.value)}
-                            className="block w-full px-4 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 dark:text-gray-900"
+                            className={teamNameInputStyles}
                             required
                         />
                     </div>
@@ -99,18 +103,18 @@ const CaptainForm = () => {
                         {players.map((player, index) => (
                             <div key={player.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-gray-50 dark:bg-gray-700/50 p-4 rounded-md">
                                 <div className="md:col-span-4">
-                                    <label htmlFor={`playerName-${player.id}`} className="block text-xs font-medium text-gray-600 dark:text-gray-300">Player Name <span className="text-red-500">*</span></label>
-                                    <input type="text" id={`playerName-${player.id}`} value={player.playerName} onChange={(e) => handlePlayerChange(player.id, 'playerName', e.target.value)} className="mt-1 block w-full input-field" required />
+                                    <label htmlFor={`playerName-${player.id}`} className="block text-xs font-medium text-gray-700 dark:text-gray-200">Player Name <span className="text-red-500">*</span></label>
+                                    <input type="text" id={`playerName-${player.id}`} value={player.playerName} onChange={(e) => handlePlayerChange(player.id, 'playerName', e.target.value)} className={inputStyles} required />
                                 </div>
                                 <div className="md:col-span-3">
-                                    <label htmlFor={`division-${player.id}`} className="block text-xs font-medium text-gray-600 dark:text-gray-300">Division <span className="text-red-500">*</span></label>
-                                    <select id={`division-${player.id}`} value={player.division} onChange={(e) => handlePlayerChange(player.id, 'division', e.target.value)} className="mt-1 block w-full select-field">
+                                    <label htmlFor={`division-${player.id}`} className="block text-xs font-medium text-gray-700 dark:text-gray-200">Division <span className="text-red-500">*</span></label>
+                                    <select id={`division-${player.id}`} value={player.division} onChange={(e) => handlePlayerChange(player.id, 'division', e.target.value)} className={inputStyles}>
                                         {DIVISIONS.map(d => <option key={d} value={d}>{d}</option>)}
                                     </select>
                                 </div>
                                 <div className="md:col-span-4">
-                                    <label htmlFor={`position-${player.id}`} className="block text-xs font-medium text-gray-600 dark:text-gray-300">Position <span className="text-red-500">*</span></label>
-                                    <select id={`position-${player.id}`} value={player.position} onChange={(e) => handlePlayerChange(player.id, 'position', e.target.value)} className="mt-1 block w-full select-field">
+                                    <label htmlFor={`position-${player.id}`} className="block text-xs font-medium text-gray-700 dark:text-gray-200">Position <span className="text-red-500">*</span></label>
+                                    <select id={`position-${player.id}`} value={player.position} onChange={(e) => handlePlayerChange(player.id, 'position', e.target.value)} className={inputStyles}>
                                         {POSITIONS.map(p => <option key={p} value={p}>{p}</option>)}
                                     </select>
                                 </div>
